@@ -1,6 +1,27 @@
 # Ansible Homelab Infrastructure
 
-This repository contains Ansible playbooks and roles for managing a homelab infrastructure with a focus on Docker deployment, user management, filesystem synchronization, and NFS mount configuration.
+- [Ansible Homelab Infrastructure](#ansible-homelab-infrastructure)
+  - [Project Structure](#project-structure)
+  - [Available Roles](#available-roles)
+    - [filesystem\_sync](#filesystem_sync)
+    - [install\_docker](#install_docker)
+    - [ping\_hosts](#ping_hosts)
+    - [setup\_nfs\_mount](#setup_nfs_mount)
+    - [update\_system\_packages](#update_system_packages)
+    - [users\_and\_groups\_sync](#users_and_groups_sync)
+  - [Usage](#usage)
+    - [Running Playbooks](#running-playbooks)
+    - [Syntax Checking](#syntax-checking)
+    - [Linting](#linting)
+  - [Configuration](#configuration)
+    - [Inventory Structure](#inventory-structure)
+    - [Variable Naming Convention](#variable-naming-convention)
+  - [Requirements](#requirements)
+  - [Security Considerations](#security-considerations)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+This repository contains Ansible playbooks and roles for managing my homelab infrastructure with user management, filesystem synchronization, and NFS mount configuration.
 
 ## Project Structure
 
@@ -30,29 +51,38 @@ ansible/
 ## Available Roles
 
 ### filesystem_sync
+
 Creates and synchronizes directories across hosts. Requires:
+
 - `filesystem_sync_target_directories`: List of directories to create
 - `filesystem_sync_target_directories_owner`: Owner for directories
 - `filesystem_sync_target_directories_group`: Group for directories
 
 ### install_docker
+
 Installs Docker and Docker Compose packages, ensures the Docker service is enabled and running.
 
 ### ping_hosts
+
 Simple connectivity test role that pings hosts and displays results.
 
 ### setup_nfs_mount
+
 Configures NFS mounts on target hosts. Supports both Debian and Arch Linux distributions. Requires:
+
 - `setup_nfs_mount_mounts`: List of mount configurations with source and target paths
 - `filesystem.nfs.server`: NFS server hostname/IP
 - `filesystem.nfs.fstype`: Filesystem type (e.g., nfs4)
 - `filesystem.nfs.options`: Mount options
 
 ### update_system_packages
+
 Updates system packages on target hosts (implementation not shown in current code).
 
 ### users_and_groups_sync
+
 Synchronizes users and groups across all hosts. Requires:
+
 - `acl.users`: List of users with their properties (name, uid, groups)
 - `acl.groups`: List of groups with their properties (name, gid)
 
@@ -93,6 +123,7 @@ ansible-lint playbooks/
 ### Inventory Structure
 
 The inventory follows a hierarchical structure with:
+
 - Host definitions in `hosts.yml`
 - Group variables in `group_vars/` directory
 - Variables cascade from `all.yml` to specific group files
@@ -100,6 +131,7 @@ The inventory follows a hierarchical structure with:
 ### Variable Naming Convention
 
 Variables use a namespace prefix to avoid conflicts:
+
 - `lab_` for general lab variables
 - `acl_` for access control list variables
 - `filesystem_` for filesystem-related variables
