@@ -1,0 +1,43 @@
+# This role ensure that users and groups are synchronized across all hosts in the homelab.
+
+- name: Check if user exists
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid | default(omit) }}"
+    state: present
+  loop: "{{ acl.users }}"
+  when: acl.users is defined and item.name is defined
+  register: user_check
+
+- name: Debug user check results
+  ansible.builtin.debug:
+    msg: "User check results: {{ user_check }}"
+
+- name: Ensure user groups are present
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: present
+  loop: "{{ acl.groups }}"
+  when: acl.groups is defined and item.name is defined
+  register: group_check
+
+- name: Debug group check results
+  ansible.builtin.debug:
+    msg: "Group check results: {{ group_check }}"
+
+- name: Ensure users are in their respective groups
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | join(',') }}"
+    append: true
+  loop: "{{ acl.users }}"
+  when:
+    - acl.users is defined
+    - item.groups is defined
+    - item.name is defined
+  register: user_group_check
+
+- name: Debug user group check results
+  ansible.builtin.debug:
+    msg: "User group check results: {{ user_group_check }}"

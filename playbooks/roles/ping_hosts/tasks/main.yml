@@ -1,0 +1,8 @@
+- name: Ping host
+  ansible.builtin.ping:
+  delegate_to: localhost
+  register: ping_result
+
+- name: Display ping results
+  ansible.builtin.debug:
+    var: ping_result

@@ -1,0 +1,7 @@
+# Variables that apply to all groups and hosts
+example_debug: false
+
+# Prefix variables with the project namespace (ex_)
+ex_backup_enabled: true
+ex_monitoring_level: standard
+ex_alert_email: alerts@example.com

@@ -1,0 +1,38 @@
+# This role updates system packages using the appropriate package manager for the OS family.
+
+# skip this role if host_tags contains 'proxmox'
+- name: Check if ansible_run_tags contains 'proxmox' or 'remote'
+  ansible.builtin.set_fact:
+    skip_update: "{{ 'proxmox' in host_tags or 'remote' in host_tags }}"
+  when: host_tags is defined and "'proxmox' in host_tags or 'remote' in host_tags"
+
+- name: Gather OS-specific facts
+  ansible.builtin.setup:
+    filter: ansible_os_family
+  when:
+    - skip_update is defined
+    - skip_update is false
+
+- name: Update packages (APT)
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+  become: true
+  when:
+    - ansible_os_family is defined
+    - ansible_os_family in ["Debian", "Ubuntu"]
+    - skip_update is defined
+    - skip_update is false
+  tags: update
+
+- name: Update packages (Pacman)
+  community.general.pacman:
+    update_cache: true
+    upgrade: true
+  become: true
+  when:
+    - ansible_os_family is defined
+    - ansible_os_family == "Archlinux"
+    - skip_update is defined
+    - skip_update is false
+  tags: update

@@ -1,0 +1,5 @@
+# Variables specific to the 'onprem' group
+ansible_user: localadmin
+ansible_become: true
+ansible_become_method: sudo
+ansible_connection: ssh

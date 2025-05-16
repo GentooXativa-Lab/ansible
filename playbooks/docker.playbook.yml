@@ -1,0 +1,27 @@
+- name: Add docker/docker-compose related packages and configuration
+  hosts: docker
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: update_system_packages
+    - role: users_and_groups_sync
+    - role: filesystem_sync
+      vars:
+        filesystem_sync_target_directories:
+          - "{{ filesystem.root_folder }}"
+          - "{{ filesystem.storage_folder }}"
+        filesystem_sync_target_directories_owner: "{{ filesystem.owner | default(acl.default_user) }}"
+        filesystem_sync_target_directories_group: "{{ filesystem.group | default(acl.default_group) }}"
+    - role: filesystem_sync
+      vars:
+        filesystem_sync_target_directories:
+          - "{{ docker_volume_folder }}"
+        filesystem_sync_target_directories_owner: "{{ docker_user | default(acl.default_user) }}"
+        filesystem_sync_target_directories_group: "{{ docker_group | default(acl.default_group) }}"
+    - role: install_docker
+    - role: setup_nfs_mount
+      vars:
+        setup_nfs_mount_mounts:
+          - source: "{{ filesystem.root_folder }}"
+            target: "{{ filesystem.root_folder }}"
