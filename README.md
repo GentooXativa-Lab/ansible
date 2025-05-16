@@ -12,6 +12,7 @@ ansible/
 │       ├── group_vars/            # Group-specific variables
 │       │   ├── all.yml           # Variables for all hosts
 │       │   ├── cloud.yml         # Variables for cloud hosts
+│       │   ├── docker.yml        # Variables for Docker hosts
 │       │   └── onprem.yml        # Variables for on-premise hosts
 │       ├── hosts.yml             # Host definitions and groupings
 │       └── README.md             # Example inventory documentation
@@ -98,7 +99,11 @@ The inventory follows a hierarchical structure with:
 
 ### Variable Naming Convention
 
-Variables use a namespace prefix (e.g., `ex_` for example inventory, `gx_` for production) to avoid conflicts.
+Variables use a namespace prefix to avoid conflicts:
+- `lab_` for general lab variables
+- `acl_` for access control list variables
+- `filesystem_` for filesystem-related variables
+- Use your own prefix for custom variables
 
 ## Requirements
 
