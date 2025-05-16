@@ -1,0 +1,47 @@
+# Variables that apply to all groups and hosts
+
+# Debug mode setting
+lab_debug: false
+
+# Access Control List (ACL) configurations
+acl:
+  default_user: "labuser"
+  default_group: "labgroup"
+  # Define users and groups for the lab environment
+  users:
+  - name: "labuser"
+    uid: 1000
+    groups:
+    - "adm"
+    - "sudo"
+    - "docker"
+    - "kvm"
+    - "media"
+    - "labgroup"
+  groups:
+  - name: "media"
+    gid: 114
+  - name: "labgroup"
+    gid: 2000
+
+# Filesystem configuration
+filesystem:
+  root_folder: "/homelab"
+  storage_folder: "/storage"
+  # Docker volume storage location (for homelab hosts, not docker hosts)
+  docker_volume_folder: "/docker-storage"
+  mode: '0755'
+  owner: "{{ acl.default_user }}"
+  group: "{{ acl.default_group }}"
+
+  # NFS mount configuration
+  nfs:
+    server: "storage.local"
+    options: "_netdev,rw,rsize=1048576,wsize=1048576,vers=4.2,auto,users"
+    fstype: "nfs4"
+
+  # SMB/CIFS mount configuration
+  cifs:
+    server: "storage.local"
+    options: "vers=3.0,credentials=/etc/labcreds/.sharelogin,iocharset=utf8,file_mode=0777,dir_mode=0777,uid=1000,gid=1000,nofail"
+    fstype: "cifs"

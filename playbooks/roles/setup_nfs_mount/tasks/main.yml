@@ -1,0 +1,38 @@
+# Setup NFS Share Mount
+
+- name: Gather OS-specific facts
+  ansible.builtin.setup:
+    filter: ansible_os_family
+
+- name: Install NFS packages (Debian)
+  ansible.builtin.package:
+    name: "nfs-common"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install NFS packages (Arch)
+  ansible.builtin.package:
+    name: "nfs-utils"
+    state: present
+  when: ansible_os_family == "Archlinux"
+
+- name: Ensure NFS mount point exists
+  ansible.builtin.file:
+    path: "{{ item.target }}"
+    state: directory
+    mode: "{{ filesystem.mode | default('0755') }}"
+    owner: "{{ filesystem.owner | default(acl.default_user) }}"
+    group: "{{ filesystem.group | default(acl.default_group) }}"
+  loop: "{{ setup_nfs_mount_mounts }}"
+  when: setup_nfs_mount_mounts is defined and setup_nfs_mount_mounts | length > 0
+
+- name: Update NFS mount entries in /etc/fstab
+  ansible.posix.mount:
+    path: "{{ item.target }}"
+    src: "{{ filesystem.nfs.server }}:{{ item.source }}"
+    fstype: "{{ filesystem.nfs.fstype }}"
+    opts: "{{ filesystem.nfs.options }}"
+    state: mounted
+    boot: true
+  loop: "{{ setup_nfs_mount_mounts }}"
+  when: setup_nfs_mount_mounts is defined and setup_nfs_mount_mounts | length > 0

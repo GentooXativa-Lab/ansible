@@ -1,0 +1,7 @@
+inventories/homelab
+
+**/*.local.md
+
+.vscode/
+
+.ansible

@@ -1,0 +1,2 @@
+# Variables specific to the 'docker' group
+docker_volume_folder: /docker-storage

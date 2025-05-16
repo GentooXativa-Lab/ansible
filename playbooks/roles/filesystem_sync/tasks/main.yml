@@ -1,0 +1,18 @@
+# This role ensure that directories are created and synchronized across all hosts in the homelab.
+#
+
+- name: Check if filesystem_sync_target_directories is defined
+  ansible.builtin.assert:
+    that:
+      - filesystem_sync_target_directories is defined
+    fail_msg: "The variable 'filesystem_sync_target_directories' must be defined."
+
+- name: Ensure directory directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ filesystem_sync_target_directories_owner | default(acl.default_user) }}"
+    group: "{{ filesystem_sync_target_directories_group | default(acl.default_group) }}"
+  loop: "{{ filesystem_sync_target_directories }}"
+  when: filesystem_sync_target_directories is defined

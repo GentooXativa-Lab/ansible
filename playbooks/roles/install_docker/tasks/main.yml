@@ -1,0 +1,17 @@
+# Install docker and docker compose on the docker hosts.
+
+- name: Install docker and docker compose on the docker hosts
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker.io
+    - docker-compose
+    - containerd
+    - containernetworking-plugins
+
+- name: Ensure docker service is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started

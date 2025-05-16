@@ -1,0 +1,4 @@
+# Variables specific to the 'cloud' group
+ansible_user: labuser
+ansible_become: true
+ansible_become_method: sudo
