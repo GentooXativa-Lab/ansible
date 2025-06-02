@@ -1,0 +1,91 @@
+---
+- name: Debug acl.authorized_keys
+  ansible.builtin.debug:
+    msg: "acl.authorized_keys: {{ acl.authorized_keys | default([]) }}"
+  when: lab_debug | default(false)
+
+- name: Validate authorized_keys variable is defined
+  ansible.builtin.assert:
+    that:
+      - acl.authorized_keys is defined
+      - acl.authorized_keys is iterable
+    fail_msg: "acl.authorized_keys must be defined as a list in group_vars"
+    success_msg: "acl.authorized_keys is properly defined"
+
+- name: Validate each authorized key entry
+  ansible.builtin.assert:
+    that:
+      - item.user is defined
+      - item.key is defined
+      - item.key is string
+      - item.key | length > 0
+    fail_msg: "Invalid authorized key entry: {{ item }}"
+    success_msg: "Valid authorized key entry for user: {{ item.user }}"
+  loop: "{{ acl.authorized_keys | default([]) }}"
+  loop_control:
+    label: "{{ item.user | default('undefined') }}"
+  when: acl.authorized_keys is defined
+
+- name: Check SSH key format validity
+  ansible.builtin.set_fact:
+    key_valid: "{{ item.key | regex_search('^(ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521)\\s+[A-Za-z0-9+/]+[=]{0,2}(\\s+.*)?$') }}"
+  loop: "{{ acl.authorized_keys | default([]) }}"
+  loop_control:
+    label: "{{ item.user | default('undefined') }}"
+  register: key_validation
+  when: acl.authorized_keys is defined
+
+- name: Report invalid SSH key formats
+  ansible.builtin.fail:
+    msg: "Invalid SSH key format for user {{ item.item.user }}: {{ item.item.key[:50] }}..."
+  loop: "{{ key_validation.results | default([]) }}"
+  when:
+    - acl.authorized_keys is defined
+    - item.ansible_facts is defined
+    - not item.ansible_facts.key_valid
+  loop_control:
+    label: "{{ item.item.user | default('undefined') }}"
+
+- name: Add authorized keys for each user
+  ansible.posix.authorized_key:
+    user: "{{ item.user }}"
+    key: "{{ item.key }}"
+    state: "{{ item.state | default('present') }}"
+    exclusive: "{{ item.exclusive | default(false) }}"
+    manage_dir: "{{ item.manage_dir | default(true) }}"
+    path: "{{ item.path | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+    key_options: "{{ item.key_options | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(true) }}"
+  loop: "{{ acl.authorized_keys | default([]) }}"
+  loop_control:
+    label: "{{ item.user }}"
+  when: 
+    - acl.authorized_keys is defined
+    - item.user is defined
+    - item.key is defined
+
+
+    # - name: Ensure .ssh directory exists for the target user
+    #   ansible.builtin.file:
+    #     dest: "/home/{{ target_user }}/.ssh"
+    #     state: directory
+    #     owner: "{{ target_user }}"
+    #     group: "{{ target_user }}"
+    #     mode: '0700'
+    
+    # - name: Check if destination authorized_keys file exists
+    #   ansible.builtin.stat:
+    #     dest: "{{ authorized_keys_dest }}"
+    #   register: authorized_keys_stat
+
+    # - name: Create authorized_keys file if it does not exist
+    #   ansible.builtin.file:
+    #     dest: "{{ authorized_keys_dest }}"
+    #     state: touch
+    #     owner: "{{ target_user }}"
+    #     group: "{{ target_user }}"
+    #     mode: '0600'
+    
+    # - name: Populate authorized_keys file
+    #   ansible.builtin.copy:

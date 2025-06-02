@@ -1,0 +1,11 @@
+# Variables specific to external provider hosts (e.g., cloud VPS)
+
+# SSH user for external provider hosts
+ansible_user: labuser
+
+# Privilege escalation settings
+ansible_become: true
+ansible_become_method: sudo
+
+# Custom SSH port for external hosts (for security)
+# exposed_ssh_port: 1337

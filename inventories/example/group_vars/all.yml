@@ -3,6 +3,12 @@
 # Debug mode setting
 lab_debug: false
 
+# Skip system update for specific hosts (can be overridden per host)
+skip_update: false
+
+# SSH port configuration (can be overridden in group_vars)
+exposed_ssh_port: 22
+
 # Access Control List (ACL) configurations
 acl:
   default_user: "labuser"
@@ -23,6 +29,20 @@ acl:
     gid: 114
   - name: "labgroup"
     gid: 2000
+  
+  # SSH authorized keys configuration
+  # Each entry must have 'user' and 'key' fields
+  authorized_keys: []
+  # Example entries:
+  # - user: "labuser"
+  #   key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... user@example.com"
+  #   state: present  # Optional: present (default) or absent
+  #   exclusive: false  # Optional: whether to remove all other keys (default: false)
+  #   manage_dir: true  # Optional: whether to create .ssh directory (default: true)
+  #   comment: "Main workstation key"  # Optional: comment for the key
+  # - user: "labuser"
+  #   key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG... backup@example.com"
+  #   state: present
 
 # Filesystem configuration
 filesystem:
