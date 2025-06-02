@@ -1,11 +1,5 @@
 # This role updates system packages using the appropriate package manager for the OS family.
 
-# skip this role if host_tags contains 'proxmox'
-- name: Check if ansible_run_tags contains 'proxmox' or 'remote'
-  ansible.builtin.set_fact:
-    skip_update: "{{ 'proxmox' in host_tags or 'remote' in host_tags }}"
-  when: host_tags is defined and "'proxmox' in host_tags or 'remote' in host_tags"
-
 - name: Gather OS-specific facts
   ansible.builtin.setup:
     filter: ansible_os_family

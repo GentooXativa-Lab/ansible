@@ -1,0 +1,9 @@
+- name: Upgrade all hosts playbook
+  hosts: all
+  become: true
+  gather_facts: false
+  roles:
+    - role: update_system_packages
+      tags: upgrade_hosts
+
+

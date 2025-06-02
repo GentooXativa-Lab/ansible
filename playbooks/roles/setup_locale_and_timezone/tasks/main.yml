@@ -1,0 +1,47 @@
+- name: Set timezone
+  community.general.timezone:
+    name: Europe/Madrid
+
+- name: Set locale
+  community.general.locale_gen:
+    name: es_ES.UTF-8
+    state: present
+
+- name: Install ntp
+  ansible.builtin.package:
+    name: ntp
+    state: present
+  when: ansible_os_family != "Gentoo"
+
+- name: Prepare gentoo USE flags
+  ansible.builtin.lineinfile:
+    dest: /etc/portage/package.use/ntp
+    line: 'net-dns/avahi mdnsresponder-compat'
+    mode: '0644'
+    create: true
+    state: present
+  when: ansible_os_family == "Gentoo"
+
+- name: Install ntp
+  community.general.portage:
+    name: ntp
+    deep: true
+    state: present
+  when: ansible_os_family == "Gentoo"
+
+- name: Restart ntp
+  ansible.builtin.service:
+    name: ntpd
+    state: restarted
+
+- name: Ensure ntp is enabled
+  ansible.builtin.systemd:
+    name: ntpd
+    enabled: true
+    state: started
+  when: ansible_os_family != "Gentoo"
+
+- name: Ensure ntpd is enabled on OpenRC 
+  ansible.builtin.command:
+    cmd: rc-update add ntpd default
+  when: ansible_os_family == "Gentoo"

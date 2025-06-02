@@ -1,0 +1,5 @@
+- name: Reboot host
+  ansible.builtin.reboot:
+    reboot_timeout: 300
+    msg: "Reboot initiated by Ansible for hostname change"
+  when: hostname_changed.changed

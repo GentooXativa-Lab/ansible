@@ -1,0 +1,7 @@
+- name: Set hostname if needed
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  register: hostname_changed
+  changed_when: hostname_changed.changed
+  notify:
+    - Reboot host
