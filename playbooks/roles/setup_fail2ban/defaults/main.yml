@@ -1,0 +1,21 @@
+---
+# Default variables for fail2ban setup
+
+# General fail2ban settings
+fail2ban_bantime: "10m"
+fail2ban_findtime: "10m"
+fail2ban_maxretry: 5
+fail2ban_destemail: "root@localhost"
+fail2ban_banaction: "iptables-multiport"
+fail2ban_protocol: "tcp"
+fail2ban_chain: "INPUT"
+fail2ban_ignoreip:
+  - "127.0.0.1/8"
+  - "::1"
+
+# SSH jail specific settings
+fail2ban_ssh_enabled: true
+fail2ban_ssh_maxretry: 3
+fail2ban_ssh_findtime: "10m"
+fail2ban_ssh_bantime: "10m"
+fail2ban_ssh_logpath: "/var/log/auth.log"

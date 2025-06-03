@@ -1,0 +1,21 @@
+---
+- name: Secure OVH servers with fail2ban and CrowdSec
+  hosts: ovh
+  become: true
+  vars:
+    ansible_port: "{{ exposed_ssh_port | default(22) }}"
+  
+  tasks:
+    - name: Apply fail2ban security role
+      ansible.builtin.include_role:
+        name: setup_fail2ban
+      tags:
+        - security
+        - fail2ban
+
+    - name: Apply CrowdSec security role
+      ansible.builtin.include_role:
+        name: setup_crowdsec
+      tags:
+        - security
+        - crowdsec
