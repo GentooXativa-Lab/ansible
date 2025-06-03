@@ -1,53 +1,53 @@
 # This playbook sets up the initial configuration for the OVH virtual servers,
 # it should be run bedore any other playbook that requires the OVH servers to be configured.
 
-# - name: Ensure authorized_keys are set for jvginer user on OVH servers
-#   hosts: ovh
-#   gather_facts: false
-#   become: true
-#   vars:
-#     ansible_user: debian
-#     target_user: jvginer
+- name: Ensure authorized_keys are set for jvginer user on OVH servers
+  hosts: ovh
+  gather_facts: false
+  become: true
+  vars:
+    ansible_user: debian
+    target_user: jvginer
 
-#   tasks:
-#     - name: Debug ansible_user
-#       ansible.builtin.debug:
-#         msg: "Current ansible user: {{ ansible_user }}"
+  tasks:
+    - name: Debug ansible_user
+      ansible.builtin.debug:
+        msg: "Current ansible user: {{ ansible_user }}"
         
-#     - name: Copy authorized_keys from debian user to root
-#       ansible.builtin.copy:
-#         src: /home/debian/.ssh/authorized_keys
-#         dest: /root/.ssh/authorized_keys
-#         owner: root
-#         group: root
-#         mode: '0600'
-#         remote_src: true
+    - name: Copy authorized_keys from debian user to root
+      ansible.builtin.copy:
+        src: /home/debian/.ssh/authorized_keys
+        dest: /root/.ssh/authorized_keys
+        owner: root
+        group: root
+        mode: '0600'
+        remote_src: true
 
-# - name: Remove debian user and group on OVH servers
-#   hosts: ovh
-#   gather_facts: false
-#   become: false
-#   vars:
-#     ansible_user: root
-#     target_user: jvginer
+- name: Remove debian user and group on OVH servers
+  hosts: ovh
+  gather_facts: false
+  become: false
+  vars:
+    ansible_user: root
+    target_user: jvginer
 
-#   tasks:
-#     - name: Reboot the server to apply changes
-#       ansible.builtin.reboot:
-#         msg: "Rebooting the server to apply changes"
-#         connect_timeout: 5
-#         reboot_timeout: 300
-#         test_command: whoami
+  tasks:
+    - name: Reboot the server to apply changes
+      ansible.builtin.reboot:
+        msg: "Rebooting the server to apply changes"
+        connect_timeout: 5
+        reboot_timeout: 300
+        test_command: whoami
 
-#     - name: Remove debian user
-#       ansible.builtin.user:
-#         name: debian
-#         state: absent
+    - name: Remove debian user
+      ansible.builtin.user:
+        name: debian
+        state: absent
 
-#     - name: Remove debian group
-#       ansible.builtin.group:
-#         name: debian
-#         state: absent
+    - name: Remove debian group
+      ansible.builtin.group:
+        name: debian
+        state: absent
 
 - name: Sync users and groups on OVH servers
   hosts: ovh
@@ -55,8 +55,11 @@
   become: true
   vars:
     ansible_user: root
+    ansible_port: "{{ exposed_ssh_port | default(22) }}"
 
   roles:
-    # - role: users_and_groups_sync
+    - role: users_and_groups_sync
+    - role: setup_sudoers
     - role: sync_authorized_keys
+    - role: setup_ssh_server
     

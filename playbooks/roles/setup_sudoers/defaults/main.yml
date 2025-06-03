@@ -1,0 +1,43 @@
+---
+# Default variables for setup_sudoers role
+
+# Example user configurations
+# sudoers_users:
+#   - name: john
+#     hosts: ALL
+#     runas: ALL
+#     nopasswd: true
+#     commands: ALL
+#   - name: jane
+#     hosts: webservers
+#     runas: www-data
+#     nopasswd: false
+#     commands: /usr/bin/systemctl restart nginx
+
+# Example group configurations
+# sudoers_groups:
+#   - name: developers
+#     hosts: ALL
+#     runas: ALL
+#     nopasswd: true
+#     commands: /usr/bin/docker, /usr/bin/docker-compose
+
+# Example aliases
+# sudoers_user_aliases:
+#   - name: ADMINS
+#     users: [john, jane]
+#
+# sudoers_cmnd_aliases:
+#   - name: SERVICES
+#     commands: [/usr/bin/systemctl start *, /usr/bin/systemctl stop *, /usr/bin/systemctl restart *]
+
+# Additional defaults
+# sudoers_defaults:
+#   - requiretty
+#   - !visiblepw
+#   - always_set_home
+
+# Additional sudoers.d files to deploy
+# sudoers_d_files:
+#   - name: 90-cloud-init-users
+#     template: cloud-init-users.j2

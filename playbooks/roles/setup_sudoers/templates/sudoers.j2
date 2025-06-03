@@ -1,0 +1,71 @@
+# {{ ansible_managed }}
+# Sudoers file managed by Ansible
+
+# User alias specification
+{% if sudoers_user_aliases is defined %}
+{% for alias in sudoers_user_aliases %}
+User_Alias {{ alias.name }} = {{ alias.users | join(', ') }}
+{% endfor %}
+{% endif %}
+
+# Runas alias specification
+{% if sudoers_runas_aliases is defined %}
+{% for alias in sudoers_runas_aliases %}
+Runas_Alias {{ alias.name }} = {{ alias.users | join(', ') }}
+{% endfor %}
+{% endif %}
+
+# Host alias specification
+{% if sudoers_host_aliases is defined %}
+{% for alias in sudoers_host_aliases %}
+Host_Alias {{ alias.name }} = {{ alias.hosts | join(', ') }}
+{% endfor %}
+{% endif %}
+
+# Cmnd alias specification
+{% if sudoers_cmnd_aliases is defined %}
+{% for alias in sudoers_cmnd_aliases %}
+Cmnd_Alias {{ alias.name }} = {{ alias.commands | join(', ') }}
+{% endfor %}
+{% endif %}
+
+# Defaults specification
+Defaults    env_reset
+Defaults    mail_badpass
+Defaults    secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+{% if sudoers_defaults is defined %}
+{% for default in sudoers_defaults %}
+Defaults    {{ default }}
+{% endfor %}
+{% endif %}
+
+# Root privileges
+root    ALL=(ALL:ALL) ALL
+
+# Members of the admin group may gain root privileges
+%admin ALL=(ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+# Default ACL user with NOPASSWD
+{% if acl.default_user is defined %}
+{{ acl.default_user }} ALL=(ALL:ALL) NOPASSWD: ALL
+{% endif %}
+
+# User privilege specification
+{% if sudoers_users is defined %}
+{% for user in sudoers_users %}
+{{ user.name }} {{ user.hosts | default('ALL') }}=({{ user.runas | default('ALL') }}) {% if user.nopasswd | default(false) %}NOPASSWD: {% endif %}{{ user.commands | default('ALL') }}
+{% endfor %}
+{% endif %}
+
+# Group privilege specification
+{% if sudoers_groups is defined %}
+{% for group in sudoers_groups %}
+%{{ group.name }} {{ group.hosts | default('ALL') }}=({{ group.runas | default('ALL') }}) {% if group.nopasswd | default(false) %}NOPASSWD: {% endif %}{{ group.commands | default('ALL') }}
+{% endfor %}
+{% endif %}
+
+# Include files from sudoers.d
+@includedir /etc/sudoers.d
