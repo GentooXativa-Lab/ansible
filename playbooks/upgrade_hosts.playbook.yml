@@ -2,6 +2,8 @@
   hosts: all
   become: true
   gather_facts: false
+  vars:
+    ansible_port: "{{ exposed_ssh_port | default(22) }}"
   roles:
     - role: update_system_packages
       tags: upgrade_hosts
