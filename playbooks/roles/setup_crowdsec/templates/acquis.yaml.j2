@@ -1,0 +1,46 @@
+# CrowdSec acquisition configuration
+# {{ ansible_managed }}
+
+# SSH logs
+{% if ansible_os_family == "Debian" %}
+filenames:
+  - /var/log/auth.log
+labels:
+  type: syslog
+{% elif ansible_os_family == "RedHat" %}
+filenames:
+  - /var/log/secure
+labels:
+  type: syslog
+{% endif %}
+
+# Nginx logs (if configured)
+{% if crowdsec_monitor_nginx | default(false) %}
+---
+filenames:
+  - /var/log/nginx/access.log
+  - /var/log/nginx/error.log
+labels:
+  type: nginx
+{% endif %}
+
+# Apache logs (if configured)
+{% if crowdsec_monitor_apache | default(false) %}
+---
+filenames:
+  - /var/log/apache2/access.log
+  - /var/log/apache2/error.log
+labels:
+  type: apache2
+{% endif %}
+
+# Custom log sources
+{% for source in crowdsec_custom_sources | default([]) %}
+---
+filenames:
+{% for file in source.files %}
+  - {{ file }}
+{% endfor %}
+labels:
+  type: {{ source.type }}
+{% endfor %}

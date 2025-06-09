@@ -1,0 +1,31 @@
+# Fail2Ban jail.local configuration file.
+# 
+# Changes will override /etc/fail2ban/jail.conf
+
+[DEFAULT]
+# Ban time duration
+bantime = {{ fail2ban_bantime | default('10m') }}
+
+# Time window for repeated failures
+findtime = {{ fail2ban_findtime | default('10m') }}
+
+# Number of failures before a ban
+maxretry = {{ fail2ban_maxretry | default(5) }}
+
+# Destination email for alerts
+destemail = {{ fail2ban_destemail | default('root@localhost') }}
+
+# Sender email
+sender = {{ fail2ban_sender | default('root@' + ansible_hostname) }}
+
+# Ban action
+banaction = {{ fail2ban_banaction | default('iptables-multiport') }}
+
+# Protocol
+protocol = {{ fail2ban_protocol | default('tcp') }}
+
+# Chain
+chain = {{ fail2ban_chain | default('INPUT') }}
+
+# Ignore IPs
+ignoreip = {{ fail2ban_ignoreip | default(['127.0.0.1/8', '::1']) | join(' ') }}

@@ -1,0 +1,16 @@
+# CrowdSec whitelist configuration
+# {{ ansible_managed }}
+
+name: whitelist
+description: "Whitelist known IP addresses"
+filter: "1 == 1"
+whitelist:
+  reason: "Whitelisted IP"
+  ip:
+{% for ip in crowdsec_whitelist_ips %}
+    - {{ ip }}
+{% endfor %}
+  cidr:
+{% for cidr in crowdsec_whitelist_cidrs | default([]) %}
+    - {{ cidr }}
+{% endfor %}

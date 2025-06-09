@@ -1,0 +1,33 @@
+---
+# Default variables for CrowdSec setup
+
+# CrowdSec collections to install
+crowdsec_collections:
+  - crowdsecurity/linux
+  - crowdsecurity/sshd
+
+# CrowdSec scenarios to install
+crowdsec_scenarios:
+  - crowdsecurity/ssh-bf
+  - crowdsecurity/ssh-slow-bf
+
+# IP addresses to whitelist (never ban these)
+crowdsec_whitelist_ips:
+  - "127.0.0.1"
+  - "::1"
+
+# CIDR blocks to whitelist
+crowdsec_whitelist_cidrs: []
+
+# Monitor additional services
+crowdsec_monitor_nginx: false
+crowdsec_monitor_apache: false
+
+# Custom log sources
+# Example:
+# crowdsec_custom_sources:
+#   - type: myapp
+#     files:
+#       - /var/log/myapp/access.log
+#       - /var/log/myapp/error.log
+crowdsec_custom_sources: []

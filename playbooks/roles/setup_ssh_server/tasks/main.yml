@@ -1,0 +1,78 @@
+# this playbook sets up an SSH server on the target machine
+
+- name: Install OpenSSH server
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+- name: Ensure SSH service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ ssh_service_name | default('ssh') }}"
+    enabled: true
+    state: started
+
+- name: Ensure password authentication is disabled
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_password_auth
+
+- name: Ensure root login is disabled
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_root_login
+
+- name: Ensure SSH port is set to the specified value
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^Port'
+    line: 'Port {{ exposed_ssh_port | default(22) }}'    
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_port
+
+- name: Configure strong ciphers only
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^Ciphers'
+    line: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_ciphers
+
+- name: Configure secure key exchange algorithms
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^KexAlgorithms'
+    line: 'KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256'
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_kex
+
+- name: Configure secure MAC algorithms
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^MACs'
+    line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256'
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  register: ssh_macs
+
+- name: Restart SSH if configuration changed
+  ansible.builtin.systemd:
+    name: "{{ ssh_service_name | default('ssh') }}"
+    state: restarted
+  when: >
+    ssh_password_auth.changed or 
+    ssh_root_login.changed or 
+    ssh_port.changed or
+    ssh_ciphers.changed or
+    ssh_kex.changed or
+    ssh_macs.changed

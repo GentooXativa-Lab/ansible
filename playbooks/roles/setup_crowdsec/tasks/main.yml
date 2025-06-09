@@ -1,0 +1,71 @@
+---
+- name: Ensure CrowdSec dependencies are installed
+  ansible.builtin.package:
+    name:
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+- name: Add CrowdSec GPG key
+  ansible.builtin.apt_key:
+    url: https://packagecloud.io/crowdsec/crowdsec/gpgkey
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add CrowdSec repository
+  ansible.builtin.apt_repository:
+    repo: "deb https://packagecloud.io/crowdsec/crowdsec/{{ ansible_distribution | lower }}/ {{ ansible_distribution_release }} main"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install CrowdSec packages
+  ansible.builtin.package:
+    name:
+      - crowdsec
+      - crowdsec-firewall-bouncer-iptables
+    state: present
+
+- name: Ensure CrowdSec service is started and enabled
+  ansible.builtin.service:
+    name: crowdsec
+    state: started
+    enabled: yes
+
+- name: Ensure CrowdSec firewall bouncer is started and enabled
+  ansible.builtin.service:
+    name: crowdsec-firewall-bouncer
+    state: started
+    enabled: yes
+
+- name: Configure CrowdSec acquisitions
+  ansible.builtin.template:
+    src: acquis.yaml.j2
+    dest: /etc/crowdsec/acquis.yaml
+    mode: '0644'
+    backup: yes
+  notify: restart crowdsec
+
+- name: Install CrowdSec collections
+  ansible.builtin.command: |
+    cscli collections install {{ item }}
+  loop: "{{ crowdsec_collections }}"
+  register: collections_result
+  changed_when: "'installed' in collections_result.stdout"
+  failed_when: "collections_result.rc != 0 and 'already installed' not in collections_result.stdout"
+
+- name: Install CrowdSec scenarios
+  ansible.builtin.command: |
+    cscli scenarios install {{ item }}
+  loop: "{{ crowdsec_scenarios }}"
+  register: scenarios_result
+  changed_when: "'installed' in scenarios_result.stdout"
+  failed_when: "scenarios_result.rc != 0 and 'already installed' not in scenarios_result.stdout"
+
+- name: Configure CrowdSec whitelist
+  ansible.builtin.template:
+    src: whitelist.yaml.j2
+    dest: /etc/crowdsec/parsers/s02-enrich/whitelist.yaml
+    mode: '0644'
+  notify: restart crowdsec
+  when: crowdsec_whitelist_ips | length > 0

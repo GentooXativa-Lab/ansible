@@ -1,0 +1,11 @@
+# SSH jail configuration
+
+[sshd]
+enabled = {{ fail2ban_ssh_enabled | default(true) }}
+port = {{ fail2ban_ssh_port | default(ansible_port | default(22)) }}
+filter = sshd
+logpath = {{ fail2ban_ssh_logpath | default('/var/log/auth.log') }}
+maxretry = {{ fail2ban_ssh_maxretry | default(3) }}
+findtime = {{ fail2ban_ssh_findtime | default('10m') }}
+bantime = {{ fail2ban_ssh_bantime | default('10m') }}
+ignoreip = {{ fail2ban_ssh_ignoreip | default(fail2ban_ignoreip | default(['127.0.0.1/8', '::1'])) | join(' ') }}
