@@ -1,0 +1,3 @@
+{% for share_name in shares %}
+{{ share_name }} 	-fstype={{ nfs.fstype }},{{ nfs.options }} 	{{ nfs.server }}:/{{ share_name }}
+{% endfor %}

@@ -1,0 +1,12 @@
+- name: Restart autofs
+  ansible.builtin.systemd:
+    name: autofs
+    state: restarted
+  when: autofs_filesystem is defined and autofs_filesystem.nfs is defined
+  tags: autofs_restart
+- name: Ensure autofs is running
+  ansible.builtin.systemd:
+    name: autofs
+    state: started
+  when: autofs_filesystem is defined and autofs_filesystem.nfs is defined
+  tags: autofs_start

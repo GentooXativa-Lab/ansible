@@ -1,0 +1,42 @@
+- name: Install autofs package
+  ansible.builtin.package:
+    name: autofs
+    state: present
+
+- name: Ensure autofs service is enabled and started
+  ansible.builtin.systemd:
+    name: autofs
+    enabled: true
+    state: started
+
+- name: Ensure autofs configuration directory exists
+  ansible.builtin.file:
+    path: /etc/auto.master.d
+    state: directory
+    mode: '0755'
+
+- name: Create autofs master map file from template
+  ansible.builtin.template:
+    src: auto.master.j2
+    dest: /etc/auto.master
+    mode: '0644'
+  notify: Restart autofs
+
+- name: Debug autofs configuration
+  ansible.builtin.debug:
+    msg: "Autofs configuration for NFS: {{ autofs_filesystem }}"
+  when: autofs_filesystem is defined
+
+- name: Create autofs map files from templates
+  vars:
+    shares: "{{ autofs_filesystem.nfs.shares | default([]) }}"
+    nfs:
+      server: "{{ autofs_filesystem.nfs.server }}"
+      options: "{{ autofs_filesystem.nfs.options }}"
+      fstype: "{{ autofs_filesystem.nfs.fstype }}"
+  ansible.builtin.template:
+    src: "auto.nfs.j2"
+    dest: "/etc/auto.storage"
+    mode: '0644'
+  notify: Restart autofs
+  when: autofs_filesystem is defined and autofs_filesystem.nfs is defined
